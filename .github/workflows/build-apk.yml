@@ -1,0 +1,35 @@
+name: Build Kivy APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:  # Позволяет запускать вручную
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y gettext autoconf automake autopoint libtool pkg-config openjdk-11-jdk
+        pip install buildozer cython==0.29.32
+
+    - name: Build APK
+      run: |
+        buildozer -v android debug
+
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: apk
+        path: bin/*.apk
