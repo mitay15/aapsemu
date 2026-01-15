@@ -3,7 +3,7 @@ name: Build Kivy APK
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:  # Позволяет запускать вручную
+  workflow_dispatch:
 
 jobs:
   build:
@@ -23,6 +23,11 @@ jobs:
         sudo apt update
         sudo apt install -y gettext autoconf automake autopoint libtool pkg-config openjdk-11-jdk
         pip install buildozer cython==0.29.32
+
+    - name: Accept Android SDK licenses
+      run: |
+        yes | sdkmanager --licenses
+        yes | sdkmanager "build-tools;36.0.0" "platform-tools" "platforms;android-33"
 
     - name: Build APK
       run: |
