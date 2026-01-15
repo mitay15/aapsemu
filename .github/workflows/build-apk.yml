@@ -47,7 +47,13 @@ jobs:
 
     - name: Install required SDK components
       run: |
-        yes | sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0"
+        yes | sdkmanager --update
+        yes | sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0" "cmdline-tools;latest"
+
+    - name: Verify Build-Tools installation
+      run: |
+        ls -la $ANDROID_SDK_ROOT/build-tools/33.0.0
+        which aidl || echo "aidl not found"
 
     - name: Install Buildozer and Cython
       run: |
