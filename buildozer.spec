@@ -119,7 +119,7 @@ android.ndk = 25b
 #android.private_storage = True
 
 # (str) Android NDK directory (if empty, it will be automatically downloaded.)
-#android.ndk_path =
+android.ndk_path = /home/runner/.buildozer/android/platform/android-ndk-r25b
 
 # (str) Android SDK directory (if empty, it will be automatically downloaded.)
 #android.sdk_path =
