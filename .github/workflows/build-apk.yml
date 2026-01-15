@@ -13,24 +13,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up Java 8 (самая стабильная для Buildozer + SDK)
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '8'
-
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.9'
-
-    - name: Install system dependencies
+    - name: Build APK in one step
       run: |
+        # 1. Установка Java 8 + зависимостей
         sudo apt update
-        sudo apt install -y gettext autoconf automake autopoint libtool pkg-config unzip wget openjdk-8-jdk
+        sudo apt install -y openjdk-8-jdk gettext autoconf automake autopoint libtool pkg-config unzip wget
 
-    - name: Pre-download Android NDK r25b
-      run: |
+        # 2. Pre-download NDK (r25b) — Buildozer не будет скачивать сам
         mkdir -p ~/.buildozer/android/platform
         cd ~/.buildozer/android/platform
         if [ ! -d "android-ndk-r25b" ]; then
@@ -39,8 +28,7 @@ jobs:
           rm ndk.zip
         fi
 
-    - name: Install Android SDK Command Line Tools
-      run: |
+        # 3. Установка Android SDK
         mkdir -p ~/android-sdk/cmdline-tools
         cd ~/android-sdk/cmdline-tools
         wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip -O cmdline-tools.zip
@@ -53,12 +41,10 @@ jobs:
         yes | sdkmanager --licenses
         yes | sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3" "cmdline-tools;latest"
 
-    - name: Install Buildozer 0.39 (стабильная версия)
-      run: |
+        # 4. Установка Buildozer 0.39
         pip install buildozer==0.39 cython==0.29.32
 
-    - name: Build APK
-      run: |
+        # 5. Сборка APK
         cd $GITHUB_WORKSPACE
         buildozer -v android debug
 
