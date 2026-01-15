@@ -48,13 +48,11 @@ jobs:
         yes | sdkmanager --update
         yes | sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0" "cmdline-tools;latest"
 
-    - name: Install Buildozer and Cython
+    - name: Install specific Buildozer version
       run: |
-        pip install buildozer cython==0.29.32
+        pip install buildozer==0.39 cython==0.29.32
 
     - name: Build APK
-      env:
-        ANDROID_SDK_ROOT: /home/runner/android-sdk
       run: |
         buildozer -v android debug
 
