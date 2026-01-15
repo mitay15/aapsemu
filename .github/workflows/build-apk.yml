@@ -29,6 +29,17 @@ jobs:
         sudo apt update
         sudo apt install -y gettext autoconf automake autopoint libtool pkg-config unzip wget
 
+    - name: Pre-download Android NDK to avoid download error
+      run: |
+        mkdir -p ~/.buildozer/android/platform
+        cd ~/.buildozer/android/platform
+        if [ ! -d "android-ndk-r25b" ]; then
+          wget https://dl.google.com/android/repository/android-ndk-r25b-linux.zip -O ndk.zip
+          unzip -q ndk.zip
+          mv android-ndk-r25b android-ndk-r25b
+          rm ndk.zip
+        fi
+
     - name: Install Android SDK Command Line Tools
       run: |
         mkdir -p ~/android-sdk/cmdline-tools
@@ -41,16 +52,16 @@ jobs:
 
     - name: Accept Android SDK licenses
       run: |
-        yes | ~/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+        yes | sdkmanager --licenses
 
     - name: Install required SDK components
       run: |
-        yes | ~/android-sdk/cmdline-tools/latest/bin/sdkmanager --update
-        yes | ~/android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0" "cmdline-tools;latest"
+        yes | sdkmanager --update
+        yes | sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0" "cmdline-tools;latest"
 
-    - name: Install old Buildozer 0.39 (stable for SDK compatibility)
+    - name: Install Buildozer and Cython
       run: |
-        pip install buildozer==0.39 cython==0.29.32
+        pip install buildozer cython==0.29.32
 
     - name: Build APK
       run: |
