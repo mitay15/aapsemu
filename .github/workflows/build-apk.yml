@@ -13,13 +13,24 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Build APK in one step
-      run: |
-        # 1. Установка Java 11 + зависимостей
-        sudo apt update
-        sudo apt install -y openjdk-11-jdk gettext autoconf automake autopoint libtool pkg-config unzip wget
+    - name: Set up Java 11
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '11'
 
-        # 2. Pre-download NDK (r25b) — Buildozer не будет скачивать сам
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.9'
+
+    - name: Install system dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y gettext autoconf automake autopoint libtool pkg-config unzip wget
+
+    - name: Pre-download Android NDK (r25b)
+      run: |
         mkdir -p ~/.buildozer/android/platform
         cd ~/.buildozer/android/platform
         if [ ! -d "android-ndk-r25b" ]; then
@@ -28,26 +39,31 @@ jobs:
           rm ndk.zip
         fi
 
-        # 3. Установка Android SDK (commandlinetools)
+    - name: Install Android SDK Command Line Tools
+      run: |
         mkdir -p ~/android-sdk/cmdline-tools
         cd ~/android-sdk/cmdline-tools
         wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip -O cmdline-tools.zip
         unzip -q cmdline-tools.zip
         mv cmdline-tools latest
-
-        # Переменные окружения (действуют до конца шага)
-        export ANDROID_SDK_ROOT=$HOME/android-sdk
+        export ANDROID_SDK_ROOT=~/android-sdk
         export PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin
 
-        # 4. Принимаем лицензии и устанавливаем компоненты
+    - name: Accept Android SDK licenses
+      run: |
         yes | sdkmanager --licenses
+
+    - name: Install required SDK components
+      run: |
         yes | sdkmanager --update
         yes | sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3" "cmdline-tools;latest"
 
-        # 5. Установка Buildozer 0.39 (стабильная версия)
+    - name: Install Buildozer 0.39
+      run: |
         pip install buildozer==0.39 cython==0.29.32
 
-        # 6. Сборка APK
+    - name: Build APK
+      run: |
         cd $GITHUB_WORKSPACE
         buildozer -v android debug
 
