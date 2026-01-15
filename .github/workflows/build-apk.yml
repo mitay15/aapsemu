@@ -50,8 +50,10 @@ jobs:
         yes | sdkmanager --update
         yes | sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0" "cmdline-tools;latest"
 
-    - name: Create symlink for Buildozer compatibility
+    - name: Create compatibility symlinks for Buildozer
       run: |
+        mkdir -p ~/.buildozer/android/platform/android-sdk/tools/bin
+        ln -s ~/android-sdk/cmdline-tools/latest/bin/sdkmanager ~/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager
         mkdir -p ~/.buildozer/android/platform/android-sdk/build-tools
         ln -s ~/android-sdk/build-tools/33.0.0 ~/.buildozer/android/platform/android-sdk/build-tools/33.0.0
 
