@@ -36,21 +36,22 @@ jobs:
         wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
         unzip -q cmdline-tools.zip
         mv cmdline-tools latest
-        echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
-        echo "PATH=$PATH:$HOME/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_ENV
+        export ANDROID_SDK_ROOT=~/android-sdk
+        export PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin
 
     - name: Accept Android SDK licenses
       run: |
-        echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
-        echo "PATH=$PATH"
-        yes | ~/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+        yes | sdkmanager --licenses
 
     - name: Install required SDK components
       run: |
-        echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
-        echo "PATH=$PATH"
-        yes | ~/android-sdk/cmdline-tools/latest/bin/sdkmanager --update
-        yes | ~/android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0" "cmdline-tools;latest"
+        yes | sdkmanager --update
+        yes | sdkmanager "platform-tools" "platforms;android-33" "build-tools;30.0.3" "cmdline-tools;latest"
+
+    - name: Create Buildozer-compatible layout
+      run: |
+        mkdir -p ~/.buildozer/android/platform/android-sdk/build-tools
+        ln -s ~/android-sdk/build-tools/30.0.3 ~/.buildozer/android/platform/android-sdk/build-tools/30.0.3
 
     - name: Install Buildozer and Cython
       run: |
