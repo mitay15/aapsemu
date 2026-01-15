@@ -29,15 +29,15 @@ jobs:
         sudo apt update
         sudo apt install -y gettext autoconf automake autopoint libtool pkg-config unzip wget
 
-    - name: Pre-download Android NDK to avoid download error
+    - name: Pre-download Android NDK (r25b)
       run: |
         mkdir -p ~/.buildozer/android/platform
         cd ~/.buildozer/android/platform
         if [ ! -d "android-ndk-r25b" ]; then
           wget https://dl.google.com/android/repository/android-ndk-r25b-linux.zip -O ndk.zip
           unzip -q ndk.zip
-          mv android-ndk-r25b android-ndk-r25b
           rm ndk.zip
+          # Распаковка создаёт папку android-ndk-r25b — ничего не переименовываем
         fi
 
     - name: Install Android SDK Command Line Tools
@@ -52,12 +52,20 @@ jobs:
 
     - name: Accept Android SDK licenses
       run: |
-        yes | sdkmanager --licenses
+        yes | ~/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
 
     - name: Install required SDK components
       run: |
-        yes | sdkmanager --update
-        yes | sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0" "cmdline-tools;latest"
+        yes | ~/android-sdk/cmdline-tools/latest/bin/sdkmanager --update
+        yes | ~/android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0" "cmdline-tools;latest"
+
+    - name: Create Buildozer-compatible layout
+      run: |
+        mkdir -p ~/.buildozer/android/platform/android-sdk
+        cp -r ~/android-sdk/cmdline-tools ~/.buildozer/android/platform/android-sdk/cmdline-tools
+        cp -r ~/android-sdk/build-tools ~/.buildozer/android/platform/android-sdk/build-tools
+        cp -r ~/android-sdk/platform-tools ~/.buildozer/android/platform/android-sdk/platform-tools
+        cp -r ~/android-sdk/platforms ~/.buildozer/android/platform/android-sdk/platforms
 
     - name: Install Buildozer and Cython
       run: |
