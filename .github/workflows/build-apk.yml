@@ -13,38 +13,27 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up Java 17
+    - name: Set up Java 11 (Buildozer 0.39 любит именно 11)
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
-        java-version: '17'
+        java-version: '11'
 
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
+        python-version: '3.9'  # Buildozer 0.39 лучше работает с 3.9
 
     - name: Install system dependencies
       run: |
         sudo apt update
-        sudo apt install -y gettext autoconf automake autopoint libtool pkg-config unzip wget
-
-    - name: Pre-download Android NDK (r25b)
-      run: |
-        mkdir -p ~/.buildozer/android/platform
-        cd ~/.buildozer/android/platform
-        if [ ! -d "android-ndk-r25b" ]; then
-          wget https://dl.google.com/android/repository/android-ndk-r25b-linux.zip -O ndk.zip
-          unzip -q ndk.zip
-          rm ndk.zip
-          # Распаковка создаёт папку android-ndk-r25b — ничего не переименовываем
-        fi
+        sudo apt install -y gettext autoconf automake autopoint libtool pkg-config unzip wget openjdk-11-jdk
 
     - name: Install Android SDK Command Line Tools
       run: |
         mkdir -p ~/android-sdk/cmdline-tools
         cd ~/android-sdk/cmdline-tools
-        wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
+        wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip -O cmdline-tools.zip
         unzip -q cmdline-tools.zip
         mv cmdline-tools latest
         export ANDROID_SDK_ROOT=~/android-sdk
@@ -52,24 +41,16 @@ jobs:
 
     - name: Accept Android SDK licenses
       run: |
-        yes | ~/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+        yes | sdkmanager --licenses
 
     - name: Install required SDK components
       run: |
-        yes | ~/android-sdk/cmdline-tools/latest/bin/sdkmanager --update
-        yes | ~/android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0" "cmdline-tools;latest"
+        yes | sdkmanager --update
+        yes | sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3" "cmdline-tools;latest"
 
-    - name: Create Buildozer-compatible layout
+    - name: Install old Buildozer 0.39
       run: |
-        mkdir -p ~/.buildozer/android/platform/android-sdk
-        cp -r ~/android-sdk/cmdline-tools ~/.buildozer/android/platform/android-sdk/cmdline-tools
-        cp -r ~/android-sdk/build-tools ~/.buildozer/android/platform/android-sdk/build-tools
-        cp -r ~/android-sdk/platform-tools ~/.buildozer/android/platform/android-sdk/platform-tools
-        cp -r ~/android-sdk/platforms ~/.buildozer/android/platform/android-sdk/platforms
-
-    - name: Install Buildozer and Cython
-      run: |
-        pip install buildozer cython==0.29.32
+        pip install buildozer==0.39 cython==0.29.32
 
     - name: Build APK
       run: |
