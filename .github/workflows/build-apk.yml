@@ -13,19 +13,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up Java 11 + JAXB fix
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '11'
-
     - name: Build APK in one step
       run: |
-        # 1. Системные пакеты
+        # 1. Установка Java 8 + зависимостей
         sudo apt update
-        sudo apt install -y gettext autoconf automake autopoint libtool pkg-config unzip wget
+        sudo apt install -y openjdk-8-jdk gettext autoconf automake autopoint libtool pkg-config unzip wget
 
-        # 2. Добавляем JAXB (для старого sdkmanager)
+        # 2. Добавляем JAXB вручную (для старого sdkmanager)
         wget https://repo1.maven.org/maven2/javax/xml/bind/jaxb-api/2.3.1/jaxb-api-2.3.1.jar -O jaxb-api.jar
         wget https://repo1.maven.org/maven2/com/sun/xml/bind/jaxb-impl/2.3.1/jaxb-impl-2.3.1.jar -O jaxb-impl.jar
         export CLASSPATH=$CLASSPATH:jaxb-api.jar:jaxb-impl.jar
