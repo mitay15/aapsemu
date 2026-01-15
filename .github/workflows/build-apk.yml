@@ -31,36 +31,29 @@ jobs:
 
     - name: Install Android SDK Command Line Tools
       run: |
-        mkdir -p $HOME/android-sdk/cmdline-tools
-        cd $HOME/android-sdk/cmdline-tools
+        mkdir -p ~/android-sdk/cmdline-tools
+        cd ~/android-sdk/cmdline-tools
         wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
         unzip -q cmdline-tools.zip
         mv cmdline-tools latest
-        echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
-        echo "PATH=$PATH:$HOME/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_ENV
+        export ANDROID_SDK_ROOT=~/android-sdk
+        export PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin
 
     - name: Accept Android SDK licenses
-      env:
-        ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
-        PATH: ${{ env.PATH }}
       run: |
         yes | sdkmanager --licenses
 
     - name: Install required SDK components
-      env:
-        ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
-        PATH: ${{ env.PATH }}
       run: |
         yes | sdkmanager --update
         yes | sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0" "cmdline-tools;latest"
 
-    - name: Create Buildozer-compatible SDK layout
+    - name: Create fake tools/bin for Buildozer
       run: |
-        mkdir -p ~/.buildozer/android/platform/android-sdk
-        cp -r $HOME/android-sdk/cmdline-tools ~/.buildozer/android/platform/android-sdk/cmdline-tools
-        cp -r $HOME/android-sdk/build-tools ~/.buildozer/android/platform/android-sdk/build-tools
-        cp -r $HOME/android-sdk/platform-tools ~/.buildozer/android/platform/android-sdk/platform-tools
-        cp -r $HOME/android-sdk/platforms ~/.buildozer/android/platform/android-sdk/platforms
+        mkdir -p ~/.buildozer/android/platform/android-sdk/tools/bin
+        ln -s ~/android-sdk/cmdline-tools/latest/bin/sdkmanager ~/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager
+        mkdir -p ~/.buildozer/android/platform/android-sdk/build-tools
+        ln -s ~/android-sdk/build-tools/33.0.0 ~/.buildozer/android/platform/android-sdk/build-tools/33.0.0
 
     - name: Install Buildozer and Cython
       run: |
