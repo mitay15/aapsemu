@@ -15,25 +15,32 @@ jobs:
 
     - name: Build APK in one step
       run: |
-        # Установка Java 11 (Buildozer 0.39 любит именно 11)
+        # Установка Java 11 и зависимостей
         sudo apt update
         sudo apt install -y openjdk-11-jdk gettext autoconf automake autopoint libtool pkg-config unzip wget
 
-        # Установка Android SDK Command Line Tools
+        # Pre-download NDK (чтобы Buildozer не скачивал сам)
+        mkdir -p ~/.buildozer/android/platform
+        cd ~/.buildozer/android/platform
+        if [ ! -d "android-ndk-r25b" ]; then
+          wget https://dl.google.com/android/repository/android-ndk-r25b-linux.zip -O ndk.zip
+          unzip -q ndk.zip
+          rm ndk.zip
+        fi
+
+        # Установка Android SDK (commandlinetools)
         mkdir -p ~/android-sdk/cmdline-tools
         cd ~/android-sdk/cmdline-tools
         wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip -O cmdline-tools.zip
         unzip -q cmdline-tools.zip
         mv cmdline-tools latest
 
-        # Переменные окружения (действуют до конца шага)
+        # Переменные окружения
         export ANDROID_SDK_ROOT=$HOME/android-sdk
         export PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin
 
-        # Принимаем лицензии
+        # Принимаем лицензии и устанавливаем компоненты
         yes | sdkmanager --licenses
-
-        # Устанавливаем компоненты
         yes | sdkmanager --update
         yes | sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3" "cmdline-tools;latest"
 
