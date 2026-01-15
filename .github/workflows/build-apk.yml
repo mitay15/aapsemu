@@ -50,10 +50,10 @@ jobs:
         yes | sdkmanager --update
         yes | sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0" "cmdline-tools;latest"
 
-    - name: Verify Build-Tools installation
+    - name: Link build-tools for Buildozer
       run: |
-        ls -la $ANDROID_SDK_ROOT/build-tools/33.0.0
-        which aidl || echo "aidl not found"
+        mkdir -p ~/.buildozer/android/platform/android-sdk/build-tools
+        ln -s ~/android-sdk/build-tools/33.0.0 ~/.buildozer/android/platform/android-sdk/build-tools/33.0.0
 
     - name: Install Buildozer and Cython
       run: |
