@@ -24,41 +24,40 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Install system dependencies
+    - name: Install system dependencies and build APK
       run: |
         sudo apt update
         sudo apt install -y gettext autoconf automake autopoint libtool pkg-config unzip wget
 
-    - name: Install Android SDK Command Line Tools
-      run: |
+        # Создаём структуру SDK
         mkdir -p ~/android-sdk/cmdline-tools
         cd ~/android-sdk/cmdline-tools
         wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
         unzip -q cmdline-tools.zip
         mv cmdline-tools latest
-        export ANDROID_SDK_ROOT=~/android-sdk
+
+        # Устанавливаем переменные
+        export ANDROID_SDK_ROOT=$HOME/android-sdk
         export PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin
 
-    - name: Accept Android SDK licenses
-      run: |
+        # Принимаем лицензии
         yes | sdkmanager --licenses
 
-    - name: Install required SDK components
-      run: |
+        # Устанавливаем компоненты
         yes | sdkmanager --update
-        yes | sdkmanager "platform-tools" "platforms;android-33" "build-tools;30.0.3" "cmdline-tools;latest"
+        yes | sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0" "cmdline-tools;latest"
 
-    - name: Create Buildozer-compatible layout
-      run: |
+        # Создаём симлинки для Buildozer (tools/bin и build-tools)
+        mkdir -p ~/.buildozer/android/platform/android-sdk/tools/bin
+        ln -s $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager ~/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager
+        chmod +x ~/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager
         mkdir -p ~/.buildozer/android/platform/android-sdk/build-tools
-        ln -s ~/android-sdk/build-tools/30.0.3 ~/.buildozer/android/platform/android-sdk/build-tools/30.0.3
+        ln -s $ANDROID_SDK_ROOT/build-tools/33.0.0 ~/.buildozer/android/platform/android-sdk/build-tools/33.0.0
 
-    - name: Install Buildozer and Cython
-      run: |
+        # Устанавливаем Buildozer
         pip install buildozer cython==0.29.32
 
-    - name: Build APK
-      run: |
+        # Запускаем сборку
         buildozer -v android debug
 
     - name: Upload APK artifact
