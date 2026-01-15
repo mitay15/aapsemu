@@ -34,7 +34,7 @@ jobs:
         mkdir -p ~/android-sdk/cmdline-tools
         cd ~/android-sdk/cmdline-tools
         wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
-        unzip cmdline-tools.zip
+        unzip -q cmdline-tools.zip
         mv cmdline-tools latest
         export ANDROID_SDK_ROOT=~/android-sdk
         export PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin
@@ -50,7 +50,7 @@ jobs:
         yes | sdkmanager --update
         yes | sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0" "cmdline-tools;latest"
 
-    - name: Link build-tools for Buildozer
+    - name: Create symlink for Buildozer compatibility
       run: |
         mkdir -p ~/.buildozer/android/platform/android-sdk/build-tools
         ln -s ~/android-sdk/build-tools/33.0.0 ~/.buildozer/android/platform/android-sdk/build-tools/33.0.0
