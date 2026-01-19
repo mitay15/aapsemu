@@ -49,7 +49,7 @@ jobs:
         # 5. Установка Buildozer 0.39
         pip install buildozer==0.39 cython==0.29.32
 
-        # 6. Сборка
+        # 6. Сборка APK
         cd $GITHUB_WORKSPACE
         buildozer -v android debug
 
