@@ -13,18 +13,24 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Build APK in one step
+    - name: Set up Java 8
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '8'
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install system dependencies
       run: |
-        # 1. Установка Java 8 + зависимостей
         sudo apt update
-        sudo apt install -y openjdk-8-jdk gettext autoconf automake autopoint libtool pkg-config unzip wget
+        sudo apt install -y gettext autoconf automake autopoint libtool pkg-config unzip wget
 
-        # 2. Добавляем JAXB вручную (для старого sdkmanager)
-        wget https://repo1.maven.org/maven2/javax/xml/bind/jaxb-api/2.3.1/jaxb-api-2.3.1.jar -O jaxb-api.jar
-        wget https://repo1.maven.org/maven2/com/sun/xml/bind/jaxb-impl/2.3.1/jaxb-impl-2.3.1.jar -O jaxb-impl.jar
-        export CLASSPATH=$CLASSPATH:jaxb-api.jar:jaxb-impl.jar
-
-        # 3. Pre-download NDK
+    - name: Pre-download Android NDK (r25b)
+      run: |
         mkdir -p ~/.buildozer/android/platform
         cd ~/.buildozer/android/platform
         if [ ! -d "android-ndk-r25b" ]; then
@@ -33,23 +39,31 @@ jobs:
           rm ndk.zip
         fi
 
-        # 4. Установка Android SDK
+    - name: Install Android SDK Command Line Tools
+      run: |
         mkdir -p ~/android-sdk/cmdline-tools
         cd ~/android-sdk/cmdline-tools
-        wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip -O cmdline-tools.zip
+        wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
         unzip -q cmdline-tools.zip
         mv cmdline-tools latest
-
-        export ANDROID_SDK_ROOT=$HOME/android-sdk
+        export ANDROID_SDK_ROOT=~/android-sdk
         export PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin
 
+    - name: Accept Android SDK licenses
+      run: |
         yes | sdkmanager --licenses
-        yes | sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3" "cmdline-tools;latest"
 
-        # 5. Установка Buildozer 0.39
-        pip install buildozer==0.39 cython==0.29.32
+    - name: Install required SDK components
+      run: |
+        yes | sdkmanager --update
+        yes | sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0" "cmdline-tools;latest"
 
-        # 6. Сборка APK
+    - name: Install Buildozer and Cython
+      run: |
+        pip install buildozer cython==0.29.32
+
+    - name: Build APK
+      run: |
         cd $GITHUB_WORKSPACE
         buildozer -v android debug
 
