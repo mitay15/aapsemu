@@ -19,13 +19,13 @@ jobs:
         sudo apt update
         sudo apt install -y openjdk-8-jdk gettext autoconf automake autopoint libtool pkg-config unzip wget
 
-        # 2. Добавляем JAXB вручную (для старого sdkmanager)
+        # 2. Добавляем JAXB вручную (решает NoClassDefFoundError)
         wget https://repo1.maven.org/maven2/javax/xml/bind/jaxb-api/2.3.1/jaxb-api-2.3.1.jar -O jaxb-api.jar
         wget https://repo1.maven.org/maven2/com/sun/xml/bind/jaxb-impl/2.3.1/jaxb-impl-2.3.1.jar -O jaxb-impl.jar
         wget https://repo1.maven.org/maven2/javax/activation/activation/1.1.1/activation-1.1.1.jar -O activation.jar
         export CLASSPATH=$CLASSPATH:jaxb-api.jar:jaxb-impl.jar:activation.jar
 
-        # 3. Pre-download NDK
+        # 3. Pre-download NDK (r25b)
         mkdir -p ~/.buildozer/android/platform
         cd ~/.buildozer/android/platform
         if [ ! -d "android-ndk-r25b" ]; then
