@@ -13,20 +13,20 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Build APK with python-for-android Docker
-      run: |
-        docker run --rm -v $GITHUB_WORKSPACE:/home/user/hostcwd kivy/python-for-android:latest \
-          bash -c "pip install sh packaging appdirs colorama jinja2 toml build && python3 -m pythonforandroid.toolchain apk \
-            --bootstrap sdl2 \
-            --requirements python3,kivy==2.3.0,pandas,openpyxl,pyjnius,pillow \
-            --arch arm64-v8a \
-            --arch armeabi-v7a \
-            --private /home/user/hostcwd \
-            --name 'AAPS Emulator' \
-            --package org.dima.aapsemulator \
-            --version 0.1 \
-            --entrypoint main.py \
-            --log-level 2"
+    - name: Build APK
+      uses: kivy/python-for-android/.github/actions/build@v1
+      with:
+        requirements: python3,kivy==2.3.0,pandas,openpyxl,pyjnius,pillow
+        archs: arm64-v8a, armeabi-v7a
+        bootstrap: sdl2
+        title: AAPS Emulator
+        package: org.dima.aapsemulator
+        version: 0.1
+        entrypoint: main.py
+        log_level: 2
+        permissions: INTERNET
+        fullscreen: false
+        orientation: portrait
 
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
